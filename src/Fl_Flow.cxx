@@ -248,13 +248,20 @@ Fl_Flow::Fl_Flow(int _x, int _y, int _w, int _h, const char *_label)
  */
 Fl_Flow::~Fl_Flow()
 {
-  Fl_Instruction *curr = m_instructions;
+  Fl_Instruction *ci = m_instructions;
 
-  while (curr)
-  {
-    Fl_Instruction *next = curr->m_next;
-    delete curr;
-    curr = next;
+  while (ci) {
+    Fl_Instruction *next = ci->m_next;
+    delete ci;
+    ci = next;
+  }
+
+  Fl_State *cs = m_states;
+
+  while (cs) {
+    Fl_State *next = cs->m_next;
+    delete cs;
+    cs = next;
   }
 }
 
