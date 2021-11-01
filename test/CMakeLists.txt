@@ -53,7 +53,7 @@ include_directories(
 # These test programs will be built with image and GL libraries.
 # Leave the variable 'extra_tests' empty to disable extra test programs.
 
-set (extra_tests)
+set (extra_tests flow flow_center flow_minimal)
 
 #######################################################################
 # Add the ANDROID_OK option if the example can be compiled for Android
