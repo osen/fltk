@@ -1,9 +1,24 @@
+//
+// Flow header file for the Fast Light Tool Kit (FLTK).
+//
+// Copyright 2021 by Karsten Pedersen and others.
+//
+// This library is free software. Distribution and use rights are outlined in
+// the file "COPYING" which should have been included with this file. If this
+// file is missing or damaged, see the license at:
+//
+//     https://www.fltk.org/COPYING.php
+//
+// Please see the following page on how to report bugs and issues:
+//
+//     https://www.fltk.org/bugs.php
+//
+
 #ifndef FL_FLOW_H
 #define FL_FLOW_H
 
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
-
 
 struct Fl_Flow : Fl_Group {
   Fl_Flow(int x = 0, int y = 0, int w = 128, int h = 128, const char *label = 0);
