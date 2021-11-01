@@ -4,15 +4,12 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
 
-#include <vector>
-#include <stdio.h>
-
 struct Fl_Instruction;
 struct Fl_State;
 
 struct Fl_Flow : Fl_Group {
   Fl_Flow(int _x = 0, int _y = 0, int _w = 128, int _h = 128, const char *_label = 0);
-  ~Fl_Flow();
+  virtual ~Fl_Flow();
   void padding(int padding);
   int padding();
   void rule(Fl_Widget &widget, const char *instructions);
@@ -26,7 +23,7 @@ struct Fl_Flow : Fl_Group {
 
 private:
   Fl_Instruction *m_instructions;
-  std::vector<Fl_State> m_states;
+  Fl_State *m_states;
   int m_padding;
   bool m_drawn;
   Fl_Callback *m_resize_cb;  // resize callback
