@@ -191,6 +191,7 @@ struct Fl_Instruction {
 
   Fl_Instruction()
     : m_widget(0)
+    , m_next(0)
     , m_instruction() {}
 
   int x_direction() {
@@ -213,6 +214,7 @@ struct Fl_Instruction {
     return 0;
   }
 
+  Fl_Instruction* m_next;
   Fl_Widget *m_widget;
   int m_instruction;
 };
@@ -232,6 +234,7 @@ struct Fl_State {
 
 Fl_Flow::Fl_Flow(int _x, int _y, int _w, int _h, const char *_label)
   : Fl_Group(_x, _y, _w, _h, _label)
+  , m_instructions(0)
   , m_padding(5)
   , m_drawn(0)
   , m_resize_cb(0)
@@ -242,7 +245,17 @@ Fl_Flow::Fl_Flow(int _x, int _y, int _w, int _h, const char *_label)
 /*
  * TODO: Allow vector<T> replacement to work with forward declares
  */
-Fl_Flow::~Fl_Flow() { }
+Fl_Flow::~Fl_Flow()
+{
+  Fl_Instruction* curr = m_instructions;
+
+  while (curr)
+  {
+    Fl_Instruction* next = curr->m_next;
+    delete curr;
+    curr = next;
+  }
+}
 
 // set padding (FLTK style: w/o prefix "set_")
 void Fl_Flow::padding(int padding) {
@@ -287,9 +300,24 @@ void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
     instruction.m_widget = widget;
     instruction.m_instruction = Fl_Instruction::decode(c, type);
 
-    if(instruction.m_instruction)
+    if (instruction.m_instruction)
     {
-      m_instructions.push_back(instruction);
+      Fl_Instruction* curr = m_instructions;
+
+      while (curr)
+      {
+        Fl_Instruction* next = curr->m_next;
+
+        if (!next)
+          break;
+
+        curr = next;
+      }
+
+      if (curr)
+        curr->m_next = new Fl_Instruction(instruction);
+      else
+        m_instructions = new Fl_Instruction(instruction);
     }
     else
     {
@@ -370,36 +398,35 @@ void Fl_Flow::resize_callback(Fl_Callback *cb, void *ctx) {
 
 void Fl_Flow::process() {
   Fl_Transform pt(this, 0);
+  Fl_Instruction* curr = m_instructions;
 
-  for (size_t ii = 0; ii < m_instructions.size(); ++ii) {
-    Fl_Instruction &i = m_instructions.at(ii);
+  while (curr)
+  {
+    if (curr->m_instruction == Fl_Instruction::MOVE_LEFT || curr->m_instruction == Fl_Instruction::MOVE_RIGHT ||
+        curr->m_instruction == Fl_Instruction::MOVE_UP || curr->m_instruction == Fl_Instruction::MOVE_DOWN ||
+        curr->m_instruction == Fl_Instruction::EXPAND_LEFT || curr->m_instruction == Fl_Instruction::EXPAND_RIGHT ||
+        curr->m_instruction == Fl_Instruction::EXPAND_UP || curr->m_instruction == Fl_Instruction::EXPAND_DOWN ||
+        curr->m_instruction == Fl_Instruction::CENTER_LEFT || curr->m_instruction == Fl_Instruction::CENTER_RIGHT ||
+        curr->m_instruction == Fl_Instruction::CENTER_UP || curr->m_instruction == Fl_Instruction::CENTER_DOWN) {
+      int xDir = curr->x_direction();
+      int yDir = curr->y_direction();
 
-    if (i.m_instruction == Fl_Instruction::MOVE_LEFT || i.m_instruction == Fl_Instruction::MOVE_RIGHT ||
-        i.m_instruction == Fl_Instruction::MOVE_UP || i.m_instruction == Fl_Instruction::MOVE_DOWN ||
-        i.m_instruction == Fl_Instruction::EXPAND_LEFT || i.m_instruction == Fl_Instruction::EXPAND_RIGHT ||
-        i.m_instruction == Fl_Instruction::EXPAND_UP || i.m_instruction == Fl_Instruction::EXPAND_DOWN ||
-        i.m_instruction == Fl_Instruction::CENTER_LEFT || i.m_instruction == Fl_Instruction::CENTER_RIGHT ||
-        i.m_instruction == Fl_Instruction::CENTER_UP || i.m_instruction == Fl_Instruction::CENTER_DOWN) {
-      int xDir = i.x_direction();
-      int yDir = i.y_direction();
-
-      Fl_Transform wt(i.m_widget, m_padding);
+      Fl_Transform wt(curr->m_widget, m_padding);
 
       int origWidth = wt.m_w;
       int origHeight = wt.m_h;
 
       while (true) {
-        if (i.m_instruction == Fl_Instruction::MOVE_LEFT || i.m_instruction == Fl_Instruction::MOVE_RIGHT ||
-            i.m_instruction == Fl_Instruction::MOVE_UP || i.m_instruction == Fl_Instruction::MOVE_DOWN) {
+        if (curr->m_instruction == Fl_Instruction::MOVE_LEFT || curr->m_instruction == Fl_Instruction::MOVE_RIGHT ||
+            curr->m_instruction == Fl_Instruction::MOVE_UP || curr->m_instruction == Fl_Instruction::MOVE_DOWN) {
           wt.translate(xDir, yDir);
-        } else if (i.m_instruction == Fl_Instruction::EXPAND_LEFT ||
-                   i.m_instruction == Fl_Instruction::EXPAND_RIGHT || i.m_instruction == Fl_Instruction::EXPAND_UP ||
-                   i.m_instruction == Fl_Instruction::EXPAND_DOWN || i.m_instruction == Fl_Instruction::CENTER_LEFT ||
-                   i.m_instruction == Fl_Instruction::CENTER_RIGHT || i.m_instruction == Fl_Instruction::CENTER_UP ||
-                   i.m_instruction == Fl_Instruction::CENTER_DOWN) {
+        } else if (curr->m_instruction == Fl_Instruction::EXPAND_LEFT || curr->m_instruction == Fl_Instruction::EXPAND_RIGHT ||
+                   curr->m_instruction == Fl_Instruction::EXPAND_UP || curr->m_instruction == Fl_Instruction::EXPAND_DOWN ||
+                   curr->m_instruction == Fl_Instruction::CENTER_LEFT || curr->m_instruction == Fl_Instruction::CENTER_RIGHT ||
+                   curr->m_instruction == Fl_Instruction::CENTER_UP || curr->m_instruction == Fl_Instruction::CENTER_DOWN) {
           wt.scale(xDir, yDir);
         } else {
-          fprintf(stderr, "Invalid instruction: '%d'\n", i.m_instruction);
+          fprintf(stderr, "Invalid instruction: '%d'\n", curr->m_instruction);
         }
 
         /*
@@ -418,7 +445,7 @@ void Fl_Flow::process() {
           Fl_State &s = m_states.at(si);
           if (!s.m_placed)
             continue;
-          if (s.m_widget == i.m_widget)
+          if (s.m_widget == curr->m_widget)
             continue;
 
           Fl_Transform st(s.m_widget, 0);
@@ -440,8 +467,8 @@ void Fl_Flow::process() {
       wt.rollback();
       // wt.debug_output();
 
-      if (i.m_instruction == Fl_Instruction::CENTER_LEFT || i.m_instruction == Fl_Instruction::CENTER_RIGHT ||
-          i.m_instruction == Fl_Instruction::CENTER_UP || i.m_instruction == Fl_Instruction::CENTER_DOWN) {
+      if (curr->m_instruction == Fl_Instruction::CENTER_LEFT || curr->m_instruction == Fl_Instruction::CENTER_RIGHT ||
+          curr->m_instruction == Fl_Instruction::CENTER_UP || curr->m_instruction == Fl_Instruction::CENTER_DOWN) {
         wt.contract(origWidth, origHeight);
         wt.commit();
       }
@@ -454,11 +481,13 @@ void Fl_Flow::process() {
      */
     for (size_t si = 0; si < m_states.size(); ++si) {
       Fl_State &s = m_states.at(si);
-      if (s.m_widget != i.m_widget)
+      if (s.m_widget != curr->m_widget)
         continue;
       s.m_placed = true;
       break;
     }
+
+    curr = curr->m_next;
   }
 }
 
@@ -492,26 +521,27 @@ void Fl_Flow::prepare() {
   /*
    * Remove any instructions with invalid children
    */
-  for (size_t ii = 0; ii < m_instructions.size(); ++ii) {
-    if (find(m_instructions.at(ii).m_widget) == children()) { // not found
-      m_instructions.erase(m_instructions.begin() + ii);
-      --ii;
-      continue;
+  Fl_Instruction* prev = 0;
+  Fl_Instruction* curr = m_instructions;
+
+  while (curr)
+  {
+    Fl_Instruction* next = curr->m_next;
+
+    if (find(curr->m_widget) == children()) { // not found
+      if (prev)
+        prev->m_next = next;
+      else
+        m_instructions = next;
+
+      delete curr;
+    }
+    else
+    {
+      prev = curr;
     }
 
-    bool found = false;
-    for (int ci = 0; ci < children(); ++ci) {
-      if (child(ci) == m_instructions.at(ii).m_widget) {
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      m_instructions.erase(m_instructions.begin() + ii);
-      --ii;
-      continue;
-    }
+    curr = next;
   }
 
   /*
