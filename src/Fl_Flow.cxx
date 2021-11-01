@@ -236,6 +236,7 @@ struct Fl_State {
 Fl_Flow::Fl_Flow(int x, int y, int w, int h, const char *label)
   : Fl_Group(x, y, w, h, label)
   , m_instructions(0)
+  , m_states(0)
   , m_padding(5)
   , m_drawn(0)
   , m_resize_cb(0)
