@@ -135,7 +135,7 @@ struct Fl_Transform {
   }
 };
 
-struct Fl_Instruction {
+struct Fl_Flow::Fl_Instruction {
   static const int NONE = 0;
   static const int EXPAND = 50;
   static const int CENTER = 60;
@@ -218,7 +218,7 @@ struct Fl_Instruction {
   int m_instruction;
 };
 
-struct Fl_State {
+struct Fl_Flow::Fl_State {
   Fl_State()
     : m_widget(0)
     , m_next(0)
@@ -249,18 +249,18 @@ Fl_Flow::Fl_Flow(int x, int y, int w, int h, const char *label)
  */
 Fl_Flow::~Fl_Flow()
 {
-  Fl_Instruction *ci = m_instructions;
+  Fl_Flow::Fl_Instruction *ci = m_instructions;
 
   while (ci) {
-    Fl_Instruction *next = ci->m_next;
+    Fl_Flow::Fl_Instruction *next = ci->m_next;
     delete ci;
     ci = next;
   }
 
-  Fl_State *cs = m_states;
+  Fl_Flow::Fl_State *cs = m_states;
 
   while (cs) {
-    Fl_State *next = cs->m_next;
+    Fl_Flow::Fl_State *next = cs->m_next;
     delete cs;
     cs = next;
   }
@@ -284,7 +284,7 @@ void Fl_Flow::rule(Fl_Widget &widget, const char *instructions) {
 }
 
 void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
-  int type = Fl_Instruction::NONE;
+  int type = Fl_Flow::Fl_Instruction::NONE;
 
   // we should assume that the widget has already been add()ed to the group
   // DO NOT:  add(widget);
@@ -298,24 +298,24 @@ void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
     char c = instructions[ci];
 
     if (c == '=') {
-      type = Fl_Instruction::EXPAND;
+      type = Fl_Flow::Fl_Instruction::EXPAND;
       continue;
     } else if (c == '/') {
-      type = Fl_Instruction::CENTER;
+      type = Fl_Flow::Fl_Instruction::CENTER;
       continue;
     }
 
-    Fl_Instruction instruction;
+    Fl_Flow::Fl_Instruction instruction;
     instruction.m_widget = widget;
-    instruction.m_instruction = Fl_Instruction::decode(c, type);
+    instruction.m_instruction = Fl_Flow::Fl_Instruction::decode(c, type);
 
     if (instruction.m_instruction)
     {
-      Fl_Instruction *curr = m_instructions;
+      Fl_Flow::Fl_Instruction *curr = m_instructions;
 
       while (curr)
       {
-        Fl_Instruction *next = curr->m_next;
+        Fl_Flow::Fl_Instruction *next = curr->m_next;
 
         if (!next)
           break;
@@ -324,16 +324,16 @@ void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
       }
 
       if (curr)
-        curr->m_next = new Fl_Instruction(instruction);
+        curr->m_next = new Fl_Flow::Fl_Instruction(instruction);
       else
-        m_instructions = new Fl_Instruction(instruction);
+        m_instructions = new Fl_Flow::Fl_Instruction(instruction);
     }
     else
     {
       fprintf(stderr, "Invalid instruction: '%c' '%d'\n", c, type);
     }
 
-    type = Fl_Instruction::NONE;
+    type = Fl_Flow::Fl_Instruction::NONE;
   }
 
   m_drawn = false; // force re-layout before drawing
@@ -347,7 +347,7 @@ void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
 int Fl_Flow::min_size(Fl_Widget *widget, int w, int h) {
   int ret = 0;
 
-  Fl_State *curr = m_states;
+  Fl_Flow::Fl_State *curr = m_states;
 
   while (curr) {
     if (curr->m_widget == widget) {
@@ -410,16 +410,16 @@ void Fl_Flow::resize_callback(Fl_Callback *cb, void *ctx) {
 
 void Fl_Flow::process() {
   Fl_Transform pt(this, 0);
-  Fl_Instruction *ci = m_instructions;
+  Fl_Flow::Fl_Instruction *ci = m_instructions;
 
   while (ci)
   {
-    if (ci->m_instruction == Fl_Instruction::MOVE_LEFT || ci->m_instruction == Fl_Instruction::MOVE_RIGHT ||
-        ci->m_instruction == Fl_Instruction::MOVE_UP || ci->m_instruction == Fl_Instruction::MOVE_DOWN ||
-        ci->m_instruction == Fl_Instruction::EXPAND_LEFT || ci->m_instruction == Fl_Instruction::EXPAND_RIGHT ||
-        ci->m_instruction == Fl_Instruction::EXPAND_UP || ci->m_instruction == Fl_Instruction::EXPAND_DOWN ||
-        ci->m_instruction == Fl_Instruction::CENTER_LEFT || ci->m_instruction == Fl_Instruction::CENTER_RIGHT ||
-        ci->m_instruction == Fl_Instruction::CENTER_UP || ci->m_instruction == Fl_Instruction::CENTER_DOWN) {
+    if (ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_LEFT   || ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_RIGHT   ||
+        ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_UP     || ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_DOWN    ||
+        ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_LEFT || ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_RIGHT ||
+        ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_UP   || ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_DOWN  ||
+        ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_LEFT || ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_RIGHT ||
+        ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_UP   || ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_DOWN) {
       int xDir = ci->x_direction();
       int yDir = ci->y_direction();
 
@@ -429,17 +429,17 @@ void Fl_Flow::process() {
       int origHeight = wt.m_h;
 
       while (true) {
-        if (ci->m_instruction == Fl_Instruction::MOVE_LEFT || ci->m_instruction == Fl_Instruction::MOVE_RIGHT ||
-            ci->m_instruction == Fl_Instruction::MOVE_UP || ci->m_instruction == Fl_Instruction::MOVE_DOWN) {
+        if (ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_LEFT || ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_RIGHT ||
+            ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_UP   || ci->m_instruction == Fl_Flow::Fl_Instruction::MOVE_DOWN) {
           wt.translate(xDir, yDir);
-        } else if (ci->m_instruction == Fl_Instruction::EXPAND_LEFT ||
-                   ci->m_instruction == Fl_Instruction::EXPAND_RIGHT ||
-                   ci->m_instruction == Fl_Instruction::EXPAND_UP ||
-                   ci->m_instruction == Fl_Instruction::EXPAND_DOWN ||
-                   ci->m_instruction == Fl_Instruction::CENTER_LEFT ||
-                   ci->m_instruction == Fl_Instruction::CENTER_RIGHT ||
-                   ci->m_instruction == Fl_Instruction::CENTER_UP ||
-                   ci->m_instruction == Fl_Instruction::CENTER_DOWN) {
+        } else if (ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_LEFT ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_RIGHT ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_UP ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::EXPAND_DOWN ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_LEFT ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_RIGHT ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_UP ||
+                   ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_DOWN) {
           wt.scale(xDir, yDir);
         } else {
           fprintf(stderr, "Invalid instruction: '%d'\n", ci->m_instruction);
@@ -457,10 +457,10 @@ void Fl_Flow::process() {
         /*
          * Collide with *positioned* siblings
          */
-        Fl_State *cs = m_states;
+        Fl_Flow::Fl_State *cs = m_states;
 
         while (cs) {
-          Fl_State *s = cs;
+          Fl_Flow::Fl_State *s = cs;
           cs = cs->m_next;
 
           if (!s->m_placed)
@@ -487,10 +487,10 @@ void Fl_Flow::process() {
       wt.rollback();
       // wt.debug_output();
 
-      if (ci->m_instruction == Fl_Instruction::CENTER_LEFT ||
-          ci->m_instruction == Fl_Instruction::CENTER_RIGHT ||
-          ci->m_instruction == Fl_Instruction::CENTER_UP ||
-          ci->m_instruction == Fl_Instruction::CENTER_DOWN) {
+      if (ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_LEFT ||
+          ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_RIGHT ||
+          ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_UP ||
+          ci->m_instruction == Fl_Flow::Fl_Instruction::CENTER_DOWN) {
         wt.contract(origWidth, origHeight);
         wt.commit();
       }
@@ -501,7 +501,7 @@ void Fl_Flow::process() {
     /*
      * Flag widget as placed.
      */
-    Fl_State *cs = m_states;
+    Fl_Flow::Fl_State *cs = m_states;
 
     while (cs) {
       if (cs->m_widget == ci->m_widget) {
@@ -520,10 +520,10 @@ void Fl_Flow::prepare() {
   /*
    * Remove any states with invalid children
    */
-  Fl_State *cs = m_states;
-  Fl_State *ps = 0;
+  Fl_Flow::Fl_State *cs = m_states;
+  Fl_Flow::Fl_State *ps = 0;
   while (cs) {
-    Fl_State *next = cs->m_next;
+    Fl_Flow::Fl_State *next = cs->m_next;
 
     if (find(cs->m_widget) == children()) {
       if (ps)
@@ -542,11 +542,11 @@ void Fl_Flow::prepare() {
   /*
    * Remove any instructions with invalid children
    */
-  Fl_Instruction *ci = m_instructions;
-  Fl_Instruction *pi = 0;
+  Fl_Flow::Fl_Instruction *ci = m_instructions;
+  Fl_Flow::Fl_Instruction *pi = 0;
   while (ci)
   {
-    Fl_Instruction *next = ci->m_next;
+    Fl_Flow::Fl_Instruction *next = ci->m_next;
 
     if (find(ci->m_widget) == children()) { // not found
       if (pi)
@@ -567,7 +567,7 @@ void Fl_Flow::prepare() {
    */
   for (int ci = 0; ci < children(); ++ci) {
     bool found = false;
-    Fl_State *cs = m_states;
+    Fl_Flow::Fl_State *cs = m_states;
     while (cs) {
       if (child(ci) == cs->m_widget) {
         found = true;
@@ -577,12 +577,12 @@ void Fl_Flow::prepare() {
     }
 
     if (found == false) {
-      Fl_State s;
+      Fl_Flow::Fl_State s;
       s.m_widget = child(ci);
       s.m_w = child(ci)->w();
       s.m_h = child(ci)->h();
       s.m_next = m_states;
-      m_states = new Fl_State(s);
+      m_states = new Fl_Flow::Fl_State(s);
     }
   }
 

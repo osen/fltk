@@ -4,8 +4,6 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
 
-struct Fl_Instruction;
-struct Fl_State;
 
 struct Fl_Flow : Fl_Group {
   Fl_Flow(int x = 0, int y = 0, int w = 128, int h = 128, const char *label = 0);
@@ -22,6 +20,9 @@ struct Fl_Flow : Fl_Group {
   virtual void resize_callback(Fl_Callback *cb, void *ctx);
 
 private:
+  struct Fl_Instruction;
+  struct Fl_State;
+
   Fl_Instruction *m_instructions;
   Fl_State *m_states;
   int m_padding;
