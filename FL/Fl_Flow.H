@@ -25,7 +25,7 @@ struct Fl_Flow : Fl_Group {
   virtual void resize_callback(Fl_Callback *cb, void *ctx);
 
 private:
-  Fl_Instruction* m_instructions;
+  Fl_Instruction *m_instructions;
   std::vector<Fl_State> m_states;
   int m_padding;
   bool m_drawn;

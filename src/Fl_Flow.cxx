@@ -17,7 +17,7 @@ static void set_position(Fl_Widget *widget, int _x, int _y) {
 }
 
 struct Fl_Transform {
-  Fl_Widget * m_widget;
+  Fl_Widget *m_widget;
   int m_padding;
   int m_x;
   int m_y;
@@ -214,7 +214,7 @@ struct Fl_Instruction {
     return 0;
   }
 
-  Fl_Instruction* m_next;
+  Fl_Instruction *m_next;
   Fl_Widget *m_widget;
   int m_instruction;
 };
@@ -226,7 +226,7 @@ struct Fl_State {
     , m_h()
     , m_placed() {}
 
-  Fl_Widget * m_widget;
+  Fl_Widget *m_widget;
   int m_w;
   int m_h;
   bool m_placed;
@@ -247,11 +247,11 @@ Fl_Flow::Fl_Flow(int _x, int _y, int _w, int _h, const char *_label)
  */
 Fl_Flow::~Fl_Flow()
 {
-  Fl_Instruction* curr = m_instructions;
+  Fl_Instruction *curr = m_instructions;
 
   while (curr)
   {
-    Fl_Instruction* next = curr->m_next;
+    Fl_Instruction *next = curr->m_next;
     delete curr;
     curr = next;
   }
@@ -302,11 +302,11 @@ void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
 
     if (instruction.m_instruction)
     {
-      Fl_Instruction* curr = m_instructions;
+      Fl_Instruction *curr = m_instructions;
 
       while (curr)
       {
-        Fl_Instruction* next = curr->m_next;
+        Fl_Instruction *next = curr->m_next;
 
         if (!next)
           break;
@@ -398,7 +398,7 @@ void Fl_Flow::resize_callback(Fl_Callback *cb, void *ctx) {
 
 void Fl_Flow::process() {
   Fl_Transform pt(this, 0);
-  Fl_Instruction* curr = m_instructions;
+  Fl_Instruction *curr = m_instructions;
 
   while (curr)
   {
@@ -521,12 +521,12 @@ void Fl_Flow::prepare() {
   /*
    * Remove any instructions with invalid children
    */
-  Fl_Instruction* prev = 0;
-  Fl_Instruction* curr = m_instructions;
+  Fl_Instruction *prev = 0;
+  Fl_Instruction *curr = m_instructions;
 
   while (curr)
   {
-    Fl_Instruction* next = curr->m_next;
+    Fl_Instruction *next = curr->m_next;
 
     if (find(curr->m_widget) == children()) { // not found
       if (prev)
