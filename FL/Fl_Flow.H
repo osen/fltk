@@ -8,7 +8,7 @@ struct Fl_Instruction;
 struct Fl_State;
 
 struct Fl_Flow : Fl_Group {
-  Fl_Flow(int _x = 0, int _y = 0, int _w = 128, int _h = 128, const char *_label = 0);
+  Fl_Flow(int x = 0, int y = 0, int w = 128, int h = 128, const char *label = 0);
   virtual ~Fl_Flow();
   void padding(int padding);
   int padding();
