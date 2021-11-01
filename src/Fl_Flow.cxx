@@ -245,7 +245,7 @@ Fl_Flow::Fl_Flow(int x, int y, int w, int h, const char *label)
 }
 
 /*
- * TODO: Allow vector<T> replacement to work with forward declares
+ * Destructor
  */
 Fl_Flow::~Fl_Flow()
 {
@@ -342,11 +342,14 @@ void Fl_Flow::rule(Fl_Widget *widget, const char *instructions) {
 /*
  * Change the (minimal) size of a widget.
  * Returns the number of status changes or 0 if widget not found.
- * TODO: Widget in state may be dangling at this point. Call prepare()
+ * TODO: Widget in state may be dangling at this point.
  */
 int Fl_Flow::min_size(Fl_Widget *widget, int w, int h) {
-  int ret = 0;
+  // don't try to update a widget that is not a child of this Fl_Flow
+  if (!widget || find(widget) == children())
+    return 0;
 
+  int ret = 0;
   Fl_Flow::Fl_State *curr = m_states;
 
   while (curr) {
