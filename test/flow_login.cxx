@@ -5,46 +5,40 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Multiline_Input.H>
 
-int main() {
-  Fl_Double_Window win(640, 480);
+int main(int argc, char **argv) {
+  Fl_Double_Window win(640, 480, "Fl_Flow login demo");
 
   Fl_Flow flow(0, 0, win.w(), win.h());
   flow.color(FL_WHITE);
   flow.box(FL_FLAT_BOX);
 
-  Fl_Flow center(0, 0, 620, 300);
-  win.size_range(center.w(), center.h());
+  Fl_Flow center(0, 0, 600, 300);
   center.box(FL_FLAT_BOX);
 
   Fl_Box logo(0, 0, 1, 1);
   logo.color(FL_WHITE);
   logo.box(FL_FLAT_BOX);
 
-  Fl_Box logoPad(0, 0, 45, 1);
-  Fl_Button login(0, 0, 100, 30, "Login");
-  Fl_Input text(0, 0, 175, 30);
-  text.label("Username:");
-  Fl_Box sep(0, 0, 10, 1);
-  sep.color(FL_BLACK);
-  sep.box(FL_FLAT_BOX);
-
-  flow.rule(center, "/</^");
-  center.rule(logo, "/<=<=^");
-  center.rule(logoPad, "<^");
-
-  center.rule(text, "^/<");
-  center.rule(sep, "=<^");
-  center.rule(logoPad, "=v");
-  center.rule(login, "v");
-  center.rule(sep, "v");
-  center.rule(text, "/v");
-
+  Fl_Box    labelPad(0, 0,  85,   1);              // invisible space for labels
+  Fl_Box    topPad  (0, 0,   1, 100);              // invisible space above inputs
+  Fl_Input  username(0, 0, 175,  30, "Username:"); // input
+  Fl_Input  password(0, 0, 175,  30, "Password:"); // input
+  Fl_Button login   (0, 0, 100,  30, "Login");     // login button
   center.end();
   flow.end();
   win.end();
-  win.resizable(flow);
-  win.show();
 
+  flow.rule(center, "/</^");    // center the main Fl_Flow inside the window
+  center.rule(logo, "/<=<=^");  // center hor., expand left, expand up
+  center.rule(labelPad, "<=^"); // reserve space for input box labels
+  center.rule(topPad, "^=<");   // reserve space above input boxes
+  center.rule(username, "^<");  // move username input up and left
+  center.rule(password, "^<");  // move password input up and left
+  center.rule(login, "v");      // position login button
+
+  win.resizable(flow);
+  win.size_range(center.w() + 10, center.h() + 10);
+  win.show(argc, argv);
   return Fl::run();
 }
 
