@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
   Fl_Flow flow(0, 0, win.w(), win.h());
   flow.color(FL_WHITE);
   flow.box(FL_FLAT_BOX);
+  flow.padding(0);
 
   Fl_Flow center(0, 0, 600, 300);
   center.box(FL_FLAT_BOX);
@@ -37,7 +38,7 @@ int main(int argc, char **argv) {
   center.rule(login, "v");      // position login button
 
   win.resizable(flow);
-  win.size_range(center.w() + 10, center.h() + 10);
+  win.size_range(center.w(), center.h());
   win.show(argc, argv);
   return Fl::run();
 }
